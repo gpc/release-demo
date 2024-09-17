@@ -36,7 +36,7 @@ jobs:
                 env:
                     RELEASE_VERSION: ${{ steps.get_version.outputs.version-without-v }}
                 with:
-                    arguments: -Pversion=${RELEASE_VERSION} :docs:asciidoctor
+                    arguments: -Pversion=${RELEASE_VERSION} asciidoctor
             -   uses: actions/configure-pages@v4
             -   uses: actions/upload-pages-artifact@v3
                 with:
