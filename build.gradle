@@ -4,7 +4,7 @@ plugins {
     id "idea"
     id "org.grails.grails-plugin"
     id "application"
-    id 'org.asciidoctor.jvm.convert' 
+    id 'org.asciidoctor.jvm.convert'
     id 'maven-publish'
     id 'signing'
     id "io.github.gradle-nexus.publish-plugin"
@@ -44,7 +44,7 @@ dependencies {
     testImplementation("org.grails:grails-gorm-testing-support")
     testImplementation("org.spockframework:spock-core")
     testImplementation("io.micronaut:micronaut-http-client")
-    
+
     runtimeOnly 'org.grails:grails-shell:6.1.2'
 
 }
@@ -127,10 +127,24 @@ tasks.withType(Sign).configureEach {
 
 import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
 
-import java.lang.management.ManagementFactory
-
 tasks.withType(InitializeNexusStagingRepository).configureEach {
     shouldRunAfter(tasks.withType(Sign))
+}
+
+tasks.register('log-debug') {
+    doFirst {
+        println "-----"
+        System.getenv().findAll { key, value -> 
+            key.startsWith('SONATYPE') || key.startsWith('SIGN')
+        }.each { key, value ->
+            println "${key}=${value?.take(1)}"
+        }
+        println "-----"
+    }
+}
+
+tasks.named('jar').configure {
+    dependsOn('log-debug')
 }
 
 nexusPublishing {
