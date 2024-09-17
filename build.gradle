@@ -4,10 +4,13 @@ plugins {
     id "idea"
     id "org.grails.grails-plugin"
     id "application"
-    id "eclipse"
+    id 'org.asciidoctor.jvm.convert' 
+    id 'maven-publish'
+    id 'signing'
+    id "io.github.gradle-nexus.publish-plugin"
 }
 
-group = "release.demo"
+group 'io.github.gpc'
 
 repositories {
     mavenCentral()
@@ -41,6 +44,8 @@ dependencies {
     testImplementation("org.grails:grails-gorm-testing-support")
     testImplementation("org.spockframework:spock-core")
     testImplementation("io.micronaut:micronaut-http-client")
+    
+    runtimeOnly 'org.grails:grails-shell:6.1.2'
 
 }
 
@@ -52,6 +57,129 @@ java {
     sourceCompatibility = JavaVersion.toVersion("11")
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = project.group
+            artifactId = 'release-demo'
+            version = project.version
+
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = 'Release Demo'
+                description = 'Release Demo for the GPC'
+                url = 'https://github.com/gpc/release-demo'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'sbglasius'
+                        name = 'Søren Berg Glasius'
+                        email = 'soeren+gpc@glasius.dk'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/gpc/release-demo.git'
+                    developerConnection = 'scm:git:https://github.com/gpc/release-demo.git'
+                    url = 'https://github.com/gpc/release-demo'
+                }
+            }
+        }
+    }
+}
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+if (System.getenv('SIGNING_KEY_ID')) {
+    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
+    ext["signing.password"] = System.getenv('SIGNING_PASSPHRASE')
+    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_FILE')
+}
+
+afterEvaluate {
+    signing {
+        if (System.getenv('SIGN_ARMORED_KEY')) {
+            String signingKey = System.getenv('SIGN_ARMORED_KEY')
+            String signingPassword = System.getenv('SIGN_PASSWORD')
+            useInMemoryPgpKeys(signingKey, signingPassword)
+        }
+        required {
+            isReleaseVersion
+        }
+
+        sign publishing.publications.maven
+    }
+}
+
+tasks.withType(Sign).configureEach {
+    onlyIf { isReleaseVersion }
+}
+
+import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
+
+import java.lang.management.ManagementFactory
+
+tasks.withType(InitializeNexusStagingRepository).configureEach {
+    shouldRunAfter(tasks.withType(Sign))
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            def ossUser = System.getenv("SONATYPE_USERNAME") ?: project.hasProperty("sonatypeOssUsername") ? project.sonatypeOssUsername : ''
+            def ossPass = System.getenv("SONATYPE_PASSWORD") ?: project.hasProperty("sonatypeOssPassword") ? project.sonatypeOssPassword : ''
+            def ossStagingProfileId = System.getenv("SONATYPE_STAGING_PROFILE_ID") ?: project.hasProperty("sonatypeOssStagingProfileIdExternalConfig") ? project.sonatypeOssStagingProfileIdExternalConfig : ''
+
+            nexusUrl = uri("https://s01.oss.sonatype.org/service/local/")
+            snapshotRepositoryUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+            username = ossUser
+            password = ossPass
+            stagingProfileId = ossStagingProfileId
+        }
+    }
+}
+
+asciidoctor {
+    resources {
+        from('src/docs/images')
+        into "./images"
+    }
+    sources {
+        include 'index.adoc'
+    }
+    attributes 'experimental': 'true',
+            'compat-mode': 'true',
+            'toc': 'left',
+            'icons': 'font',
+            'version': project.version,
+            'sourcedir': 'src/main/groovy'
+    baseDirFollowsSourceDir()
+    outputDir = "${buildDir}/asciidoc"
+}
+
+tasks.register('apiDocs', Copy) {
+    from groovydoc.outputs.files
+    into file("${buildDir}/asciidoc/api")
+}
+
+asciidoctor.dependsOn(apiDocs)
+
+tasks.register('snapshotVersion') {
+    doLast {
+        if (isReleaseVersion) {
+            ant.propertyfile(file: "gradle.properties") {
+                entry(key: "version", value: "${project.version}-SNAPSHOT")
+            }
+        }
+    }
 }

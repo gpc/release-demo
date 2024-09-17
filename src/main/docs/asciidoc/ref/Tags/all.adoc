@@ -1,0 +1,5 @@
+==== f:something
+
+===== Purpose
+
+Renders something
