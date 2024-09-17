@@ -57,7 +57,7 @@ jobs:
                     SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
                     RELEASE_VERSION: ${{ needs.get-version.outputs.version }}
                 run: |
-                    echo "Publishing Artifacts for $RELEASE_VERSION"
+                    echo "Publishing Artifacts for ${RELEASE_VERSION}"
                     (set -x; ./gradlew -Pversion="${RELEASE_VERSION}" publishToSonatype closeAndReleaseSonatypeStagingRepository --no-daemon)
     bump-snapshot-version:
         runs-on: ubuntu-latest
@@ -88,7 +88,7 @@ jobs:
                     github_token: ${{ secrets.GITHUB_TOKEN }}
                     author_name: ${{ vars.GIT_USER_NAME }}
                     author_email: $${ vars.GIT_USER_EMAIL }}
-                    branch: ${{ steps.branch-names.outputs.current_branch }}
+                    branch: ${{ steps.branch-names.outputs.default_branch }}
                     message: Set project version to ${{ env.NEXT_VERSION }}-SNAPSHOT
     documenation:
         runs-on: ubuntu-latest
