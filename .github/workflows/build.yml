@@ -5,10 +5,13 @@ name: Check and publish snapshot
 
 on:
     push:
-        branches: [ master, main ]
+        branches:
+            - master
+            - main
     pull_request:
-        branches: [ master, main ]
-
+        branches:
+            - master
+            - main
 jobs:
     build:
         runs-on: ubuntu-latest
