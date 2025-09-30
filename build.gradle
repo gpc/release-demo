@@ -1,21 +1,39 @@
+buildscript {
+    ext {
+        grailsVersion = project.grailsVersion
+    }
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.grails.org/grails/core/" }
+        maven { url "https://repo.grails.org/grails/restricted" }
+    }
+    dependencies {
+        classpath platform("org.apache.grails:grails-bom:$grailsVersion")
+        classpath "org.apache.grails:grails-gradle-plugins"
+    }
+}
+
 plugins {
-    id "groovy"
-    id "war"
-    id "idea"
-    id "org.grails.grails-plugin"
-    id "application"
+    id 'groovy'
+    id 'war'
+    id 'idea'
+    id 'application'
+    id 'java-library'
     id 'org.asciidoctor.jvm.convert'
     id 'maven-publish'
     id 'signing'
-    id "io.github.gradle-nexus.publish-plugin"
+    id 'io.github.gradle-nexus.publish-plugin'
 }
 
-group 'io.github.gpc'
+apply plugin: 'org.apache.grails.gradle.grails-plugin'
 
 repositories {
     mavenCentral()
     maven { url "https://repo.grails.org/grails/core/" }
+    maven { url "https://repo.grails.org/grails/restricted" }
 }
+
+group 'io.github.gpc'
 
 configurations {
     all {
@@ -23,29 +41,16 @@ configurations {
 }
 
 dependencies {
-    implementation("org.grails:grails-core")
-    implementation("org.grails:grails-logging")
-    implementation("org.grails:grails-plugin-databinding")
-    implementation("org.grails:grails-plugin-i18n")
-    implementation("org.grails:grails-plugin-interceptors")
-    implementation("org.grails:grails-plugin-rest")
-    implementation("org.grails:grails-plugin-services")
-    implementation("org.grails:grails-plugin-url-mappings")
-    implementation("org.grails:grails-web-boot")
-    implementation("org.grails.plugins:hibernate5")
-    implementation("org.springframework.boot:spring-boot-autoconfigure")
-    implementation("org.springframework.boot:spring-boot-starter-logging")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    compileOnly("io.micronaut:micronaut-inject-groovy")
-    console("org.grails:grails-console")
+    compileOnly platform("org.apache.grails:grails-bom:$grailsVersion")
+    compileOnly 'org.apache.grails:grails-dependencies-starter-web'
+    
+    console("org.apache.grails:grails-console")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.apache.tomcat:tomcat-jdbc")
-    testImplementation("io.micronaut:micronaut-inject-groovy")
-    testImplementation("org.grails:grails-gorm-testing-support")
+    
+    testImplementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    testImplementation("org.apache.grails:grails-testing-support-web")
     testImplementation("org.spockframework:spock-core")
-    testImplementation("io.micronaut:micronaut-http-client")
-
-    runtimeOnly 'org.grails:grails-shell:6.1.2'
 
 }
 
@@ -54,7 +59,9 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion("11")
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    withJavadocJar()
+    withSourcesJar()
 }
 
 tasks.withType(Test).configureEach {
