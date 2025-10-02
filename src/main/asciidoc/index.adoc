@@ -1,0 +1,33 @@
+= The Grails Plugin Collective (GPC)
+:doctype: book
+:author: Grails Plugin Collective (GPC)
+:source-highlighter: coderay
+:numbered:
+:imagesdir: ./images
+
+image::grails-logo.png[]
+
+[#introduction]
+include::1 introduction.adoc[levelOffset=2]
+
+== Installation
+
+Here is an example of how you use the plugin dependency
+
+[source,groovy,subs=attributes+]
+----
+    implementation 'io.github.gpc:release-demo:{revnumber}'
+----
+
+
+[#reference]
+== Reference
+
+[[ref-tags]]
+=== Tags
+
+[[ref-tags-all]]
+==== all
+
+include::ref/Tags/all.adoc[]
+

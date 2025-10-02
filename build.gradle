@@ -131,22 +131,6 @@ tasks.withType(InitializeNexusStagingRepository).configureEach {
     shouldRunAfter(tasks.withType(Sign))
 }
 
-tasks.register('log-debug') {
-    doFirst {
-        println "-----"
-        System.getenv().findAll { key, value -> 
-            key.startsWith('SONATYPE') || key.startsWith('SIGN')
-        }.each { key, value ->
-            println "${key}=${value?.take(1)}"
-        }
-        println "-----"
-    }
-}
-
-tasks.named('jar').configure {
-    dependsOn('log-debug')
-}
-
 nexusPublishing {
     repositories {
         sonatype {
