@@ -1,21 +1,37 @@
-plugins {
-    id "groovy"
-    id "war"
-    id "idea"
-    id "org.grails.grails-plugin"
-    id "application"
-    id 'org.asciidoctor.jvm.convert'
-    id 'maven-publish'
-    id 'signing'
-    id "io.github.gradle-nexus.publish-plugin"
+buildscript {
+    ext {
+        grailsVersion = project.grailsVersion
+    }
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.grails.org/grails/core/" }
+        maven { url "https://repo.grails.org/grails/restricted" }
+    }
+    dependencies {
+        classpath platform("org.apache.grails:grails-bom:$grailsVersion")
+        classpath "org.apache.grails:grails-gradle-plugins"
+    }
 }
 
-group 'io.github.gpc'
+plugins {
+    id 'groovy'
+    id 'war'
+    id 'idea'
+    id 'application'
+    id 'java-library'
+    id 'org.asciidoctor.jvm.convert'
+}
+
+apply plugin: 'org.apache.grails.gradle.grails-plugin'
+apply plugin: 'org.apache.grails.gradle.grails-publish'
 
 repositories {
     mavenCentral()
     maven { url "https://repo.grails.org/grails/core/" }
+    maven { url "https://repo.grails.org/grails/restricted" }
 }
+
+group 'io.github.gpc'
 
 configurations {
     all {
@@ -23,29 +39,16 @@ configurations {
 }
 
 dependencies {
-    implementation("org.grails:grails-core")
-    implementation("org.grails:grails-logging")
-    implementation("org.grails:grails-plugin-databinding")
-    implementation("org.grails:grails-plugin-i18n")
-    implementation("org.grails:grails-plugin-interceptors")
-    implementation("org.grails:grails-plugin-rest")
-    implementation("org.grails:grails-plugin-services")
-    implementation("org.grails:grails-plugin-url-mappings")
-    implementation("org.grails:grails-web-boot")
-    implementation("org.grails.plugins:hibernate5")
-    implementation("org.springframework.boot:spring-boot-autoconfigure")
-    implementation("org.springframework.boot:spring-boot-starter-logging")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    compileOnly("io.micronaut:micronaut-inject-groovy")
-    console("org.grails:grails-console")
+    compileOnly platform("org.apache.grails:grails-bom:$grailsVersion")
+    compileOnly 'org.apache.grails:grails-dependencies-starter-web'
+    
+    console("org.apache.grails:grails-console")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.apache.tomcat:tomcat-jdbc")
-    testImplementation("io.micronaut:micronaut-inject-groovy")
-    testImplementation("org.grails:grails-gorm-testing-support")
+    
+    testImplementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    testImplementation("org.apache.grails:grails-testing-support-web")
     testImplementation("org.spockframework:spock-core")
-    testImplementation("io.micronaut:micronaut-http-client")
-
-    runtimeOnly 'org.grails:grails-shell:6.1.2'
 
 }
 
@@ -54,97 +57,25 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion("11")
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    withJavadocJar()
+    withSourcesJar()
 }
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId = project.group
-            artifactId = project.name
-            version = project.version
-
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-
-            pom {
-                name = 'Release Demo'
-                description = 'Release Demo for the GPC'
-                url = 'https://github.com/gpc/release-demo'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'sbglasius'
-                        name = 'Søren Berg Glasius'
-                        email = 'soeren+gpc@glasius.dk'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/gpc/release-demo.git'
-                    developerConnection = 'scm:git:https://github.com/gpc/release-demo.git'
-                    url = 'https://github.com/gpc/release-demo'
-                }
-            }
-        }
+grailsPublish {
+    githubSlug = 'gpc/release-demo'
+    license {
+        name = 'Apache-2.0'
     }
-}
-ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-
-if (System.getenv('SIGNING_KEY_ID')) {
-    ext["signing.keyId"] = System.getenv('SIGNING_KEY_ID')
-    ext["signing.password"] = System.getenv('SIGNING_PASSPHRASE')
-    ext["signing.secretKeyRingFile"] = System.getenv('SIGNING_FILE')
-}
-
-afterEvaluate {
-    signing {
-        if (System.getenv('SIGN_ARMORED_KEY')) {
-            String signingKey = System.getenv('SIGN_ARMORED_KEY')
-            String signingPassword = System.getenv('SIGN_PASSWORD')
-            useInMemoryPgpKeys(signingKey, signingPassword)
-        }
-        required {
-            isReleaseVersion
-        }
-
-        sign publishing.publications.maven
-    }
-}
-
-tasks.withType(Sign).configureEach {
-    onlyIf { isReleaseVersion }
-}
-
-import io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository
-
-tasks.withType(InitializeNexusStagingRepository).configureEach {
-    shouldRunAfter(tasks.withType(Sign))
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            def ossUser = System.getenv("SONATYPE_USERNAME") ?: project.hasProperty("sonatypeOssUsername") ? project.sonatypeOssUsername : ''
-            def ossPass = System.getenv("SONATYPE_PASSWORD") ?: project.hasProperty("sonatypeOssPassword") ? project.sonatypeOssPassword : ''
-            def ossStagingProfileId = System.getenv("SONATYPE_STAGING_PROFILE_ID") ?: project.hasProperty("sonatypeOssStagingProfileIdExternalConfig") ? project.sonatypeOssStagingProfileIdExternalConfig : ''
-
-            nexusUrl = uri("https://s01.oss.sonatype.org/service/local/")
-            snapshotRepositoryUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-            username = ossUser
-            password = ossPass
-            stagingProfileId = ossStagingProfileId
-        }
-    }
+    title = 'Release Demo'
+    desc = 'Release Demo for the GPC'
+    developers = [
+            sbglasius: "Søren Berg Glasius"
+    ]
 }
 
 asciidoctor {
@@ -171,13 +102,3 @@ tasks.register('apiDocs', Copy) {
 }
 
 asciidoctor.dependsOn(apiDocs)
-
-tasks.register('snapshotVersion') {
-    doLast {
-        if (isReleaseVersion) {
-            ant.propertyfile(file: "gradle.properties") {
-                entry(key: "version", value: "${project.version}-SNAPSHOT")
-            }
-        }
-    }
-}
