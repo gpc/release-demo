@@ -1,7 +1,14 @@
-= Introduction
+Introduction
 
-[none]
-* 🙋‍♀️ This is the https://github.com/gpc[GPC or Grails Plugin Collective]. A place for Grails plugins.
-* 🌈 The life of these plugins are greatly dependent on the contributions from the community. Any pull-request, bug-report og feature-request are taken into consideration.
-* 🧙 Remember, this is a community effort. No plugin here can survive without active involvement from the community.
+Welcome to the GPC Release Demo project!
 
+This repository demonstrates the recommended structure and release process for GPC (Global Project Collaboration) projects. It is not a plugin, but a reference to help developers and contributors understand how to set up, organize, and maintain a GPC-compliant project.
+
+== Purpose
+
+The main goal of this project is to provide guidance and practical examples for:
+* Structuring a GPC project repository
+* Participating in project collaboration and release workflows
+* Ensuring best practices for documentation, contribution, and code management
+
+Whether you are starting a new project or aligning an existing one with the GPC standards, this guide will help you get started.
