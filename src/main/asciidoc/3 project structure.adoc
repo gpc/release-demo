@@ -1,0 +1,22 @@
+= Project Structure
+
+A typical GPC project repository is organized as follows:
+
+* `src/main/asciidoc/` — Documentation written in AsciiDoc format
+* `src/` — Source code and main project logic
+* `resources/` — Project assets such as images, configuration files, or sample data
+* `tests/` — Automated tests and test data
+* `README.adoc` — Overview and basic usage instructions
+* `CONTRIBUTING.adoc` — Guidelines for contributing to the project
+* `LICENSE` — The project's open source license
+
+This structure helps contributors and users quickly find documentation, code, and resources. Always keep documentation up-to-date as the project evolves.
+
+== Recommended Licenses
+
+For maximum compatibility with Grails (Apache 2.0), GPC projects are encouraged to use one of the following permissive licenses:
+- Apache License 2.0 (recommended for most cases)
+- MIT License
+- BSD 2-Clause or 3-Clause
+
+These allow broad use, contribution, and commercial adoption. Avoid strong copyleft licenses (like GPL) if you want maximum compatibility and adoption.
