@@ -4,6 +4,7 @@
 :source-highlighter: coderay
 :numbered:
 :imagesdir: ./images
+:project: ../../..
 
 image::grails-logo.png[]
 

@@ -1,20 +1,41 @@
 = Project Structure
+:project: ../../..
 
 A typical GPC project repository is organized as follows:
 
-* `src/main/asciidoc/` — Documentation written in AsciiDoc format
-* `src/` — Source code and main project logic
-* `resources/` — Project assets such as images, configuration files, or sample data
-* `tests/` — Automated tests and test data
-* `README.adoc` — Overview and basic usage instructions
-* `CONTRIBUTING.adoc` — Guidelines for contributing to the project
+* A regular grails-plugin project (`grails create-plugin my-plugin`).
+** Will create `grails-app/` and `src/main/groovy`, `src/test/groovy` etc...
+* `README.adoc` or `README.md` — Overview and basic usage instructions
 * `LICENSE` — The project's open source license
+* Optional:
+** `src/main/asciidoc/` — Documentation written in AsciiDoc format. 
+** `CONTRIBUTING.adoc` — Guidelines for contributing to the project
 
-This structure helps contributors and users quickly find documentation, code, and resources. Always keep documentation up-to-date as the project evolves.
+This structure helps contributors and users quickly find documentation, code, and resources.
+Always keep documentation up-to-date as the project evolves.
+
+== Recommendations
+
+These recommendations follows that of the Grails Plugins maintained by the core Grails committers.
+
+=== Dependencies
+
+While `grails create-plugin` do come with a ready-to-use `build.gradle` file, there has been done an effort for plugins to carry as few dependencies as possible. For that reason, it is recommended to replace the standard Grails dependencies with:
+
+[source,groovy]
+----
+include::{project}/build.gradle[tag=dependencies]
+----
+
+If there in your dependency graph is dependencies that you want the user of your plugin to have as `implementation` dependencies, use the Gradle `java-library` plugin, and declare them as `api` in your dependency block.
+
+
+
 
 == Recommended Licenses
 
 For maximum compatibility with Grails (Apache 2.0), GPC projects are encouraged to use one of the following permissive licenses:
+
 - Apache License 2.0 (recommended for most cases)
 - MIT License
 - BSD 2-Clause or 3-Clause

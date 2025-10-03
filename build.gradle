@@ -4,8 +4,14 @@ buildscript {
     }
     repositories {
         mavenCentral()
-        maven { url "https://repo.grails.org/grails/core/" }
         maven { url "https://repo.grails.org/grails/restricted" }
+        maven {
+            url = 'https://repository.apache.org/content/groups/snapshots'
+            content {
+                includeVersionByRegex('org[.]apache[.](grails|groovy).*', '.*', '.*-SNAPSHOT')
+            }
+        }
+        mavenLocal()
     }
     dependencies {
         classpath platform("org.apache.grails:grails-bom:$grailsVersion")
@@ -33,11 +39,7 @@ repositories {
 
 group 'io.github.gpc'
 
-configurations {
-    all {
-    }
-}
-
+// tag::dependencies[]
 dependencies {
     compileOnly platform("org.apache.grails:grails-bom:$grailsVersion")
     compileOnly 'org.apache.grails:grails-dependencies-starter-web'
@@ -49,8 +51,8 @@ dependencies {
     testImplementation platform("org.apache.grails:grails-bom:$grailsVersion")
     testImplementation("org.apache.grails:grails-testing-support-web")
     testImplementation("org.spockframework:spock-core")
-
 }
+// end::dependencies[]
 
 application {
     mainClass.set("release.demo.Application")
@@ -78,27 +80,4 @@ grailsPublish {
     ]
 }
 
-asciidoctor {
-    resources {
-        from('src/docs/images')
-        into "./images"
-    }
-    sources {
-        include 'index.adoc'
-    }
-    attributes 'experimental': 'true',
-            'compat-mode': 'true',
-            'toc': 'left',
-            'icons': 'font',
-            'version': project.version,
-            'sourcedir': 'src/main/groovy'
-    baseDirFollowsSourceDir()
-    outputDir = "${buildDir}/asciidoc"
-}
-
-tasks.register('apiDocs', Copy) {
-    from groovydoc.outputs.files
-    into file("${buildDir}/asciidoc/api")
-}
-
-asciidoctor.dependsOn(apiDocs)
+apply from: 'gradle/docs-config.gradle'
