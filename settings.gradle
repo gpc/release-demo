@@ -9,5 +9,6 @@ pluginManagement {
         id 'org.asciidoctor.jvm.convert' version '4.0.3'
     }
 }
-
+// tag::projectName[]
 rootProject.name="release-demo"
+// end::projectName[]

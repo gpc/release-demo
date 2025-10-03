@@ -36,8 +36,10 @@ repositories {
     maven { url "https://repo.grails.org/grails/core/" }
     maven { url "https://repo.grails.org/grails/restricted" }
 }
-
-group 'io.github.gpc'
+// tag::versionAndGroup[]
+version = projectVersion
+group = 'io.github.gpc'
+// end::versionAndGroup[]
 
 // tag::dependencies[]
 dependencies {
