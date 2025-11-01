@@ -142,10 +142,9 @@ jobs:
         uses: apache/grails-github-actions/post-release@asf
   notify-slack:
     name: Notify Slack
-    needs: [ publish ]
+    needs: release
     if: ${{ success() }}
     runs-on: ubuntu-latest
-
     steps:
       - name: Prepare release body
         id: body
