@@ -1,5 +1,6 @@
-= Project Structure
 :project: ../../..
+
+= Project Structure
 
 A typical Grails Plugin Collective (GPC) project repository is organized in a way that makes it easy for contributors and users to find code, documentation, and supporting resources.
 
@@ -10,11 +11,12 @@ A standard plugin project (created with `grails create-plugin my-plugin`) will c
 [source]
 ----
 my-plugin/
- ├─ grails-app/                 # Grails application resources (domain, services, controllers etc)
- |                              # Leave out unneded folders
+ ├─ gradle/                     # Gradle artefacts and additional build files
+ ├─ grails-app/                 # Grails resources (domain, services, controllers etc)
+ |                              # Leave out empty folders (aka remove .gitkeep)
  ├─ src/
  |  ├─ main/groovy/             # Plugin source code
- |  └─ test/groovy/             # Unit and integration tests
+ |  ├─ test/groovy/             # Unit and integration tests
  |  └─ integration-test/groovy/ # Unit and integration tests
  ├─ README.adoc|md              # Overview and usage instructions
  ├─ LICENSE.md                  # Open source license
@@ -23,13 +25,15 @@ my-plugin/
  └─ settings.gradle             # Gradle project settings
 ----
 
-Optional but recommended:
+Extras, not created automatically:
 
 * `src/main/asciidoc/` — Documentation written in AsciiDoc format
 * `CONTRIBUTING.adoc` — Guidelines for contributing to the project
-* `.github/workflows/` — GitHub Actions workflows for CI/CD and releases
+* `.github/` — GitHub Actions workflows for CI/CD and releases and the release-drafter GH plugin
 
 Keeping this structure consistent helps contributors quickly orient themselves in any GPC project.
+
+You can copy the files from this project to your own gpc project.
 
 == Requirements
 
@@ -41,7 +45,8 @@ To deploy a Grails project automatically using GitHub Workflows there are a few 
 include::{project}/gradle.properties[tag=versions]
 ----
 
-The project version is maintained here as `projectVersion`. In `build.gradle` it is referenced like this:
+The project version is maintained here as `projectVersion`.
+In `build.gradle` it is referenced like this:
 
 [source,groovy]
 .build.gradle
@@ -57,10 +62,9 @@ And the release coordinates `group` is `io.github.gpc`, which gives a maven coor
 include::{project}/settings.gradle[tag=projectName]
 ----
 
-
 == Recommendations
 
-These recommendations follow the practices of Grails plugins maintained by the Grails core team.
+These recommendations follow the same practices of Grails plugins maintained by the Grails core team.
 
 === Dependencies
 
@@ -84,20 +88,71 @@ include::{project}/build.gradle[tag=dependencies]
 implementation "org.grails:grails-core"
 
 // Good: keeps the plugin lean, only exposing what’s necessary
-api "org.springframework.boot:spring-boot-starter"
+api "org.apache.grails:grails-micronaut"
 ----
 
 This approach ensures plugins stay modular, compatible, and easy to integrate.
+
+=== Extra build steps.
+
+==== Apply the grails publish plugin
+
+You should apply the `grails-publish` plugin (an extended plugin that uses `maven-publish` behind the scene):
+
+[source,groovy]
+.build.gradle
+----
+include::{project}/build.gradle[tag=applyGrailsPublish]
+----
+
+and add a `grailsPlublish` block :
+
+[source,groovy]
+.build.gradle
+----
+include::{project}/build.gradle[tag=grailsPublish]
+----
+
+==== Building documentation
+
+If you have `src/main/asciidoc` you can add the `docs-config.gradle` script:
+
+[source,groovy]
+.build.gradle
+----
+include::{project}/build.gradle[tag=applyDocs]
+----
+
+You also need to remove the `buildScript` block from `build.gradle` and instead make a directory `buildSrc` and copy `buildSrc/build.gradle` from this project to your own.
+And finally you have to add the `asciidoctorGradlePluginVersion` to your `gradle.properties`
+
+[source,groovy]
+.gradle.properties
+----
+include::{project}/gradle.properties[tag=adocVersions]
+----
+
+==== Bonus: Printing released artefact information
+
+To emit package information when your `publish` task is done, simply add the `post-publish.gradle` script:
+
+[source,groovy]
+.build.gradle
+----
+include::{project}/build.gradle[tag=applyPostPublish]
+----
 
 === Recommended Licenses
 
 For maximum compatibility with Grails (licensed under Apache 2.0), GPC projects are encouraged to use a permissive license:
 
-* Apache License 2.0 (recommended for most cases)
+* Apache License 2.0, recommended for most cases, and 100% compatible with Grails Core.
+Just copy the `LICENSE` file from this project.
 * MIT License
 * BSD 2-Clause or 3-Clause
 
 These licenses encourage broad adoption, contributions, and commercial use.
+
 Avoid strong copyleft licenses (e.g., GPL), as they restrict usage in many commercial projects and may limit adoption.
 
 == Summary

@@ -8,4 +8,5 @@ class DemoService {
     String doSomething() {
         "It works!"
     }
+    
 }

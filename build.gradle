@@ -1,40 +1,18 @@
-buildscript {
-    ext {
-        grailsVersion = project.grailsVersion
-    }
-    repositories {
-        mavenCentral()
-        maven { url "https://repo.grails.org/grails/restricted" }
-        maven {
-            url = 'https://repository.apache.org/content/groups/snapshots'
-            content {
-                includeVersionByRegex('org[.]apache[.](grails|groovy).*', '.*', '.*-SNAPSHOT')
-            }
-        }
-        mavenLocal()
-    }
-    dependencies {
-        classpath platform("org.apache.grails:grails-bom:$grailsVersion")
-        classpath "org.apache.grails:grails-gradle-plugins"
-    }
-}
-
 plugins {
     id 'groovy'
-    id 'war'
-    id 'idea'
     id 'application'
     id 'java-library'
-    id 'org.asciidoctor.jvm.convert'
 }
 
 apply plugin: 'org.apache.grails.gradle.grails-plugin'
+// tag::applyGrailsPublish[]
 apply plugin: 'org.apache.grails.gradle.grails-publish'
+// end::applyGrailsPublish[]
 
 repositories {
     mavenCentral()
-    maven { url "https://repo.grails.org/grails/core/" }
-    maven { url "https://repo.grails.org/grails/restricted" }
+    maven { url 'https://repo.grails.org/grails/core/' }
+    maven { url 'https://repo.grails.org/grails/restricted' }
 }
 // tag::versionAndGroup[]
 version = projectVersion
@@ -43,21 +21,29 @@ group = 'io.github.gpc'
 
 // tag::dependencies[]
 dependencies {
+    // Will prevent dependencies to become transient runtime dependencies
     compileOnly platform("org.apache.grails:grails-bom:$grailsVersion")
     compileOnly 'org.apache.grails:grails-dependencies-starter-web'
-    
-    console("org.apache.grails:grails-console")
-    runtimeOnly("com.h2database:h2")
-    runtimeOnly("org.apache.tomcat:tomcat-jdbc")
-    
+    // aggregates all web, non-test, non-database Grails dependencies.
+    // Alternatively use 
+    // compileOnly 'org.apache.grails:grails-dependencies' // aggregates all web, hibernate, database, non-test Grails dependencies.  
+
+    // Artefacts you want to be transient runtime dependencies can be specified as
+    implementation 'org.apache.commons:commons-lang3:3.19.0'
+
+    // Artefacts you want to be transients implementation dependencies can be specified as
+    api 'org.apache.commons:commons-lang3:3.19.0'
+    // Just remember to apply the gradle java-library plugin
+
+    // Needs to be defined again, as there are no implementation dependencies
     testImplementation platform("org.apache.grails:grails-bom:$grailsVersion")
-    testImplementation("org.apache.grails:grails-testing-support-web")
-    testImplementation("org.spockframework:spock-core")
+    testImplementation 'org.apache.grails:grails-dependencies-test' // aggregates all non-data test dependencies 
+    testImplementation 'org.spockframework:spock-core'
 }
 // end::dependencies[]
 
 application {
-    mainClass.set("release.demo.Application")
+    mainClass.set 'release.demo.Application'
 }
 
 java {
@@ -70,6 +56,7 @@ tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
 
+// tag::grailsPublish[]
 grailsPublish {
     githubSlug = 'gpc/release-demo'
     license {
@@ -81,5 +68,11 @@ grailsPublish {
             sbglasius: "Søren Berg Glasius"
     ]
 }
+// end::grailsPublish[]
 
+// tag::applyDocs[]
 apply from: 'gradle/docs-config.gradle'
+// end::applyDocs[]
+// tag::applyPostPublish[]
+apply from: 'gradle/post-publish.gradle'
+// end::applyPostPublish[]

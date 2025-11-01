@@ -1,14 +1,13 @@
-Introduction
+= Introduction
 
-Welcome to the GPC Release Demo project!
+*Welcome to the GPC Release Demo project!*
 
-This repository demonstrates the recommended structure and release process for GPC (Global Project Collaboration) projects. It is not a plugin, but a reference to help developers and contributors understand how to set up, organize, and maintain a GPC-compliant project.
+This repository demonstrates the recommended structure and release process for GPC (Grails Plugin Collective) projects.
+It is not a plugin, but a reference to help developers and contributors understand how to set up, organize, and maintain a GPC-compliant project.
 
 == Purpose
 
 The main goal of this project is to provide guidance and practical examples for:
-* Structuring a GPC project repository
-* Participating in project collaboration and release workflows
-* Ensuring best practices for documentation, contribution, and code management
+* Structuring a GPC project repository * Ensuring best practices for documentation, contribution, and code management
 
 Whether you are starting a new project or aligning an existing one with the GPC standards, this guide will help you get started.

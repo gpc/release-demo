@@ -1,6 +1,5 @@
-import org.asciidoctor.gradle.jvm.AsciidoctorTask
-
 apply plugin: 'org.asciidoctor.jvm.convert'
+import org.asciidoctor.gradle.jvm.AsciidoctorTask
 
 tasks.withType(Groovydoc).configureEach {
     access = GroovydocAccess.PROTECTED
@@ -19,30 +18,30 @@ tasks.withType(AsciidoctorTask).configureEach {
     }
     jvm {
         jvmArgs += [
-            '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
-            '--add-opens', 'java.base/java.io=ALL-UNNAMED'
+                '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+                '--add-opens', 'java.base/java.io=ALL-UNNAMED'
         ]
     }
     attributes = [
-        copyright            : 'Apache License, Version 2.0',
-        docinfo1             : 'true',
-        doctype              : 'book',
-        encoding             : 'utf-8',
-        icons                : 'font',
-        id                   : "$rootProject.name:$version",
-        idprefix             : '',
-        idseparator          : '-',
-        lang                 : 'en',
-        linkattrs            : true,
-        numbered             : '',
-        producer             : 'Asciidoctor',
-        revnumber            : version,
-        setanchors           : true,
-        'source-highlighter' : 'prettify',
-        toc                  : 'left',
-        toc2                 : '',
-        toclevels            : '2',
-        projectVersion       : version
+            copyright           : 'Apache License, Version 2.0',
+            docinfo1            : 'true',
+            doctype             : 'book',
+            encoding            : 'utf-8',
+            icons               : 'font',
+            id                  : "$rootProject.name:$version",
+            idprefix            : '',
+            idseparator         : '-',
+            lang                : 'en',
+            linkattrs           : true,
+            numbered            : '',
+            producer            : 'Asciidoctor',
+            revnumber           : version,
+            setanchors          : true,
+            'source-highlighter': 'prettify',
+            toc                 : 'left',
+            toc2                : '',
+            toclevels           : '2',
+            projectVersion      : version
     ]
 }
 
