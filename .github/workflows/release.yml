@@ -145,39 +145,55 @@ jobs:
     needs: release
     if: ${{ success() }}
     runs-on: ubuntu-latest
+
     steps:
-      - name: Prepare release body
-        id: body
+      - name: Prepare Slack payload
+        id: prepare
         env:
           RELEASE_BODY: ${{ github.event.release.body }}
         run: |
-          # Write to a temporary file, preserving newlines safely
+          # Save release notes safely
           if [ -n "$RELEASE_BODY" ]; then
             printf "%s" "$RELEASE_BODY" > body.txt
           else
             echo "No release notes provided." > body.txt
           fi
-          
-          # Sanitize: remove carriage returns (from Windows-style line endings)
-          tr -d '\r' < body.txt > body_clean.txt
-          
-          # Encode as a single-line JSON-safe string using jq
-          echo "body=$(jq -Rs . < body_clean.txt)" >> "$GITHUB_OUTPUT"
 
-      - name: Send Slack message
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "text": ":rocket: *${{ github.repository }}* just released *${{ github.event.release.tag_name }}*",
-              "attachments": [
+          # Clean carriage returns
+          tr -d '\r' < body.txt > body_clean.txt
+
+          # Build the Slack payload JSON using jq to ensure proper escaping
+          jq -n \
+            --arg repo "${{ github.repository }}" \
+            --arg tag "${{ github.event.release.tag_name }}" \
+            --arg title "${{ github.event.release.name }}" \
+            --arg url "${{ github.event.release.html_url }}" \
+            --rawfile body body_clean.txt \
+            '{
+              text: ":rocket: *\($repo)*, just released *\($tag)*",
+              blocks: [
                 {
-                  "color": "#36a64f",
-                  "title": "${{ github.event.release.name }}",
-                  "title_link": "${{ github.event.release.html_url }}",
-                  "text": ${{ steps.body.outputs.body }}
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: ":rocket: *\($repo)* just released *\($tag)*"
+                  }
+                },
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: "*<\($url)|\($title)>*\n\n\($body)"
+                  }
                 }
               ]
-            }
+            }' > slack_payload.json
+
+          echo "✅ Created slack_payload.json"
+          cat slack_payload.json
+      - name: Send Slack message
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          payload-file-path: slack_payload.json
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
