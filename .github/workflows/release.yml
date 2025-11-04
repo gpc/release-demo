@@ -159,23 +159,17 @@ jobs:
           fi
   
           # Clean carriage returns
-          tr -d '\r' < body.txt > body_clean.txt
+          CLEANED_BODY="$(tr -d '\r' < body.txt)"
           
           # Expose as multiline-safe output variable
-          {
-            echo -n 'body='
-            cat body_clean.txt
-            echo ''
-          } >> "$GITHUB_OUTPUT"
+            echo 'body=$CLEANED_BODY' >> "$GITHUB_OUTPUT"
+      - run: echo "${{ steps.prepared.outputs.body }}"
       - name: Convert release message to Slack mrkdwn
         id: slackify
         uses: LoveToKnow/slackify-markdown-action@v1.1.1
         with: 
           text: ${{ steps.prepare.outputs.body }}
-      - name: Echo
-        run: |
-          echo "${{ steps.prepare.outputs.body }}
-          echo "${{ steps.slackify.outputs.text }}"
+      - run: echo "${{ steps.slackify.outputs.text }}"
 #
 #          # Build the Slack payload JSON using jq to ensure proper escaping
 #          jq -n \
