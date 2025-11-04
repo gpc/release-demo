@@ -163,8 +163,10 @@ jobs:
           cat body.txt 
           echo '-------------'
           # Clean carriage returns
-          CLEANED_BODY="$(tr -d '\r' < body.txt)"
-          
+          CLEANED_BODY="$(cat body.txt)"
+          #CLEANED_BODY="${CLEANED_BODY//'%'/'%25'}"
+          #CLEANED_BODY="${CLEANED_BODY//$'\n'/'%0A'}"
+          #CLEANED_BODY="${CLEANED_BODY//$'\r'/'%0D'}"
           # Expose as multiline-safe output variable
           echo 'Cleaned body:'
           echo "$CLEANED_BODY"
