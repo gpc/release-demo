@@ -151,7 +151,7 @@ jobs:
         env:
           RELEASE_BODY: ${{ github.event.release.body }}
         run: |
-          echo "# :rocket: *\(${{ github.repository }})*, just released *\(${{ github.event.release.tag_name }})*\n\n" > body.txt
+          echo "# :rocket: *${{ github.repository }}*, just released *${{ github.event.release.tag_name }}*\n\n" > body.txt
           
           # Save release notes safely
           if [ -n "$RELEASE_BODY" ]; then
