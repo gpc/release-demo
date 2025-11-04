@@ -158,7 +158,8 @@ jobs:
             echo "No release notes provided." > body.txt
           fi
           # Clean carriage returns
-          CLEANED_BODY="$( sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' body.txt)"
+          #CLEANED_BODY="$( sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' body.txt)"
+          CLEANED_BODY="$( cat body.txt)"
           
           echo "body=$CLEANED_BODY" >> "$GITHUB_OUTPUT"
       - name: Echo 1
