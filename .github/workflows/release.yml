@@ -151,7 +151,7 @@ jobs:
         env:
           RELEASE_BODY: ${{ github.event.release.body }}
         run: |
-          echo "# :rocket: *\($repo)*, just released *\($tag)*\n" > body.txt
+          echo "# :rocket: *\(${{ github.repository }})*, just released *\(${{ github.event.release.tag_name }})*\n\n" > body.txt
           
           # Save release notes safely
           if [ -n "$RELEASE_BODY" ]; then
@@ -161,14 +161,14 @@ jobs:
           fi
           echo 'Body:'
           cat body.txt 
-          
+          echo '-------------'
           # Clean carriage returns
           CLEANED_BODY="$(tr -d '\r' < body.txt)"
           
-          rm body.txt
           # Expose as multiline-safe output variable
           echo 'Cleaned body:'
-          echo $CLEANED_BODY
+          echo "$CLEANED_BODY"
+          echo '-------------'
           
           echo "body=$CLEANED_BODY" >> "$GITHUB_OUTPUT"
       - run: echo "${{ steps.prepared.outputs.body }}"
