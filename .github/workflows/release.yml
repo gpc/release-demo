@@ -151,18 +151,26 @@ jobs:
         env:
           RELEASE_BODY: ${{ github.event.release.body }}
         run: |
+          echo "# :rocket: *\($repo)*, just released *\($tag)*\n" > body.txt
+          
           # Save release notes safely
           if [ -n "$RELEASE_BODY" ]; then
-            printf "%s" "$RELEASE_BODY" > body.txt
+            printf "%s" "$RELEASE_BODY" >> body.txt
           else
-            echo "No release notes provided." > body.txt
+            echo "No release notes provided." >> body.txt
           fi
-  
+          echo 'Body:'
+          cat body.txt 
+          
           # Clean carriage returns
           CLEANED_BODY="$(tr -d '\r' < body.txt)"
           
+          rm body.txt
           # Expose as multiline-safe output variable
-            echo 'body=$CLEANED_BODY' >> "$GITHUB_OUTPUT"
+          echo 'Cleaned body:'
+          echo $CLEANED_BODY
+          
+          echo "body=$CLEANED_BODY" >> "$GITHUB_OUTPUT"
       - run: echo "${{ steps.prepared.outputs.body }}"
       - name: Convert release message to Slack mrkdwn
         id: slackify
