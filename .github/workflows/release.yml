@@ -173,7 +173,10 @@ jobs:
           echo '-------------'
           
           echo "body=$CLEANED_BODY" >> "$GITHUB_OUTPUT"
-      - run: echo "${{ steps.prepare.outputs.body }}"
+      - name: Echo 1
+        env:
+          OUTPUT: ${{ steps.prepare.outputs.body }}
+        run: echo "$OUTPUT"
       - name: Convert release message to Slack mrkdwn
         id: slackify
         uses: fazulk/slackify-markdown-action@v1.1.5
