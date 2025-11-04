@@ -163,20 +163,20 @@ jobs:
           cat body.txt 
           echo '-------------'
           # Clean carriage returns
-          CLEANED_BODY="$(cat body.txt)"
+          CLEANED_BODY="$( sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' body.txt)"
           #CLEANED_BODY="${CLEANED_BODY//'%'/'%25'}"
-          #CLEANED_BODY="${CLEANED_BODY//$'\n'/'%0A'}"
-          #CLEANED_BODY="${CLEANED_BODY//$'\r'/'%0D'}"
+          #CLEANED_BODY="${CLEANED_BODY//$'\n'/'\\n'}"
+          #CLEANED_BODY="${CLEANED_BODY//$'\r'/''}"
           # Expose as multiline-safe output variable
           echo 'Cleaned body:'
           echo "$CLEANED_BODY"
           echo '-------------'
           
           echo "body=$CLEANED_BODY" >> "$GITHUB_OUTPUT"
-      - run: echo "${{ steps.prepared.outputs.body }}"
+      - run: echo "${{ steps.prepare.outputs.body }}"
       - name: Convert release message to Slack mrkdwn
         id: slackify
-        uses: LoveToKnow/slackify-markdown-action@v1.1.1
+        uses: fazulk/slackify-markdown-action@v1.1.5
         with: 
           text: ${{ steps.prepare.outputs.body }}
       - run: echo "${{ steps.slackify.outputs.text }}"
