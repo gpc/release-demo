@@ -151,26 +151,14 @@ jobs:
         env:
           RELEASE_BODY: ${{ github.event.release.body }}
         run: |
-          echo "# :rocket: *${{ github.repository }}*, just released *${{ github.event.release.tag_name }}*\n\n" > body.txt
-          
           # Save release notes safely
           if [ -n "$RELEASE_BODY" ]; then
-            printf "%s" "$RELEASE_BODY" >> body.txt
+            printf "%s" "$RELEASE_BODY" > body.txt
           else
-            echo "No release notes provided." >> body.txt
+            echo "No release notes provided." > body.txt
           fi
-          echo 'Body:'
-          cat body.txt 
-          echo '-------------'
           # Clean carriage returns
           CLEANED_BODY="$( sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' body.txt)"
-          #CLEANED_BODY="${CLEANED_BODY//'%'/'%25'}"
-          #CLEANED_BODY="${CLEANED_BODY//$'\n'/'\\n'}"
-          #CLEANED_BODY="${CLEANED_BODY//$'\r'/''}"
-          # Expose as multiline-safe output variable
-          echo 'Cleaned body:'
-          echo "$CLEANED_BODY"
-          echo '-------------'
           
           echo "body=$CLEANED_BODY" >> "$GITHUB_OUTPUT"
       - name: Echo 1
@@ -182,40 +170,19 @@ jobs:
         uses: fazulk/slackify-markdown-action@v1.1.5
         with: 
           text: ${{ steps.prepare.outputs.body }}
-      - run: echo "${{ steps.slackify.outputs.text }}"
-#
-#          # Build the Slack payload JSON using jq to ensure proper escaping
-#          jq -n \
-#            --arg repo "${{ github.repository }}" \
-#            --arg tag "${{ github.event.release.tag_name }}" \
-#            --arg title "${{ github.event.release.name }}" \
-#            --arg url "${{ github.event.release.html_url }}" \
-#            --rawfile body body_clean.txt \
-#            '{
-#              text: ":rocket: *\($repo)*, just released *\($tag)*",
-#              blocks: [
-#                {
-#                  type: "section",
-#                  text: {
-#                    type: "mrkdwn",
-#                    text: ":rocket: *\($repo)* just released *\($tag)*"
-#                  }
-#                },
-#                {
-#                  type: "section",
-#                  text: {
-#                    type: "mrkdwn",
-#                    text: "*<\($url)|\($title)>*\n\n\($body)"
-#                  }
-#                }
-#              ]
-#            }' > slack_payload.json
-#
-#          echo "✅ Created slack_payload.json"
-#          cat slack_payload.json
-#      - name: Send Slack message
-#        uses: slackapi/slack-github-action@v2.1.1
-#        with:
-#          payload-file-path: slack_payload.json
-#          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-#          webhook-type: incoming-webhook
+      - name: Echo 2
+        env:
+          OUTPUT: ${{ steps.slackify.outputs.text }}
+        run: echo "$OUTPUT"
+      - name: Send Slack message
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          payload: |
+            text: ":rocket: *${{ github.repository }}*, just released *${{ github.event.release.tag_name }}*"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: ${{ steps.slackify.outputs.text }}
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
